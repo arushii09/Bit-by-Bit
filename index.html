@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talkstack - Knowledge Sharing Platform with AI Assistant</title>
+    <style>
+        :root {
+            --primary: #afcde9;
+            --secondary: #9add86;
+            --dark: #616d71;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .search-bar {
+            flex-grow: 0.5;
+            margin: 0 2rem;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 25px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: calc(100vh - 72px);
+        }
+        
+        .sidebar {
+            background-color: #3c4248;
+            padding: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-menu a {
+            color: var(--light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .question-card {
+            background-color: #3c4248;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .question-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #b2bec3;
+        }
+        
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .tag {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .ask-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .ask-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--secondary);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Chatbot Widget Styles - Always Visible */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 50%;
+            right: 50%;
+            transform: translate(50%, 50%);
+            z-index: 1000;
+            width: 350px;
+            height: 500px;
+        }
+
+        .chatbot-container {
+            width: 100%;
+            height: 100%;
+            background-color: #3c4248;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .chatbot-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 12px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #2d3436;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #4a5258;
+            color: #f5f6fa;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #3c4248;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            outline: none;
+            font-size: 14px;
+            transition: border 0.3s;
+            background-color: #2d3436;
+            color: white;
+        }
+
+        .chatbot-input input:focus {
+            border-color: var(--secondary);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.98);
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            background-color: #4a5258;
+            border-radius: 18px;
+            align-self: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .error-message {
+            align-self: flex-start;
+            background-color: #ffebee;
+            color: #c62828;
+            border-bottom-left-radius: 4px;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        body.light-theme {
+            background-color: #f5f6fa;
+            color: #2d3436;
+        }
+
+        body.light-theme .question-card {
+            background-color: white;
+        }
+
+        body.light-theme .sidebar {
+            background-color: #e0e0e0;
+        }
+
+        body.light-theme .chatbot-container {
+            background-color: white;
+        }
+
+        body.light-theme .chatbot-messages {
+            background-color: #f5f5f5;
+        }
+
+        body.light-theme .chatbot-input {
+            background-color: white;
+        }
+
+        body.light-theme .chatbot-input input {
+            background-color: #f5f5f5;
+        }
+
+        body.light-theme .bot-message {
+            background-color: #e9e9e9;
+            color: #333;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #3c4248;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: white;
+        }
+
+        #signupForm input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #2d3436;
+            color: white;
+        }
+
+        #signupForm button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="image/Logo1.png" alt="Talkstack Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+            Talkstack</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search questions...">
+        </div>
+        <button class="theme-toggle">🌗</button>
+        <button class="signup-btn" id="openSignupModal">Sign Up</button>
+    </nav>
+    
+    <div class="main-container">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Questions</a></li>
+                <li><a href="#">Tags</a></li>
+                <li><a href="#">Users</a></li>
+                <li><a href="#">Saved</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </aside>
+        
+        <main class="content">
+            
+            
+        </main>
+    </div>
+    
+    <button class="ask-btn">+</button>
+    
+    <!-- Chatbot Widget - Always Visible -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-container" id="chatbot">
+            <div class="chatbot-header">
+                <div class="chatbot-title">AI Assistant</div>
+                <div class="chatbot-controls">
+                    <button class="control-btn minimize-btn">−</button>
+                    <button class="control-btn close-btn">×</button>
+                </div>
+            </div>
+            <div class="chatbot-messages" id="messages">
+                <div class="message bot-message">
+                    Hello! I'm your AI assistant for Talkstack. How can I help with your questions today?
+                    <div class="timestamp">Just now</div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
+                <button class="send-btn" id="sendBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeSignupModal">&times;</span>
+            <h2>Create an Account</h2>
+            <form id="signupForm">
+                <input type="text" placeholder="Username" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+            if (body.classList.contains('light-theme')) {
+                themeToggle.textContent = '🌙';
+            } else {
+                themeToggle.textContent = '🌓';
+            }
+        });
+
+        // Chatbot functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbot = document.getElementById('chatbot');
+            const messagesContainer = document.getElementById('messages');
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const minimizeBtn = document.querySelector('.minimize-btn');
+            const closeBtn = document.querySelector('.close-btn');
+
+            // API Configuration
+            const API_KEY = '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';
+            const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+            const MODEL = 'deepseek/deepseek-r1-0528:free';
+            
+            // Conversation history
+            let conversationHistory = [
+                {
+                    role: "system",
+                    content: "You are a helpful AI assistant for Talkstack, a knowledge sharing platform. Help users with programming questions, debugging, and best practices. Be concise and technical when needed."
+                }
+            ];
+
+            // Minimize functionality
+            minimizeBtn.addEventListener('click', function() {
+                chatbot.style.height = '60px';
+                chatbot.style.overflow = 'hidden';
+                document.querySelector('.chatbot-messages').style.display = 'none';
+                document.querySelector('.chatbot-input').style.display = 'none';
+            });
+
+            closeBtn.addEventListener('click', function() {
+                chatbot.style.display = 'none';
+            });
+
+            // Send message function
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+
+                // Add user message to chat and history
+                addMessage(message, 'user-message');
+                conversationHistory.push({ role: "user", content: message });
+                userInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                try {
+                    // Get AI response
+                    const response = await getAIResponse();
+                    
+                    // Remove typing indicator
+                    removeTypingIndicator();
+                    
+                    // Add AI response to chat and history
+                    addMessage(response, 'bot-message');
+                    conversationHistory.push({ role: "assistant", content: response });
+                } catch (error) {
+                    removeTypingIndicator();
+                    addMessage("Sorry, I encountered an error. Please try again.", 'error-message');
+                    console.error("API Error:", error);
+                }
+            }
+
+            // Get AI response from OpenRouter API
+            async function getAIResponse() {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "HTTP-Referer": window.location.href,
+                        "X-Title": "Talkstack AI Assistant",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": MODEL,
+                        "messages": conversationHistory
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            }
+
+            // Add message to chat
+            function addMessage(text, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', type);
+                messageDiv.innerHTML = text + `<div class="timestamp">${getCurrentTime()}</div>`;
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Show typing indicator
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.classList.add('typing-indicator');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                messagesContainer.appendChild(typingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Remove typing indicator
+            function removeTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            // Get current time for timestamp
+            function getCurrentTime() {
+                const now = new Date();
+                return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Modal functionality
+            const signupModal = document.getElementById('signupModal');
+            const openSignupModal = document.getElementById('openSignupModal');
+            const closeSignupModal = document.getElementById('closeSignupModal');
+
+            openSignupModal.addEventListener('click', () => {
+                signupModal.style.display = 'block';
+            });
+
+            closeSignupModal.addEventListener('click', () => {
+                signupModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === signupModal) {
+                    signupModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
